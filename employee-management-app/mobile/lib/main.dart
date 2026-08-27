@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'core/constants/app_colors.dart';
 import 'core/config/app_config.dart';
 import 'core/network/api_client.dart';
+import 'core/session/app_session.dart';
 import 'core/storage/secure_storage.dart';
 import 'features/announcements/providers/announcement_provider.dart';
 import 'features/announcements/services/announcement_service.dart';
@@ -13,8 +14,8 @@ import 'features/attendance/services/attendance_service.dart';
 import 'features/attendance_alarms/providers/attendance_alarm_provider.dart';
 import 'features/attendance_alarms/services/attendance_alarm_service.dart';
 import 'features/auth/providers/auth_provider.dart';
-import 'features/auth/screens/splash_screen.dart';
 import 'features/auth/services/auth_service.dart';
+import 'features/auth/screens/role_selection_screen.dart';
 import 'features/branches/providers/branch_provider.dart';
 import 'features/branches/services/branch_service.dart';
 import 'features/company/providers/company_provider.dart';
@@ -41,6 +42,8 @@ import 'features/profile/providers/profile_provider.dart';
 import 'features/profile/services/profile_service.dart';
 import 'features/referral/providers/referral_provider.dart';
 import 'features/referral/services/referral_service.dart';
+import 'features/employees/providers/employee_provider.dart';
+import 'features/employees/services/employee_api_service.dart';
 import 'features/roles/providers/role_provider.dart';
 import 'features/roles/services/role_service.dart';
 import 'features/salary/providers/salary_provider.dart';
@@ -51,8 +54,9 @@ import 'features/trips/providers/trip_provider.dart';
 import 'features/trips/services/trip_service.dart';
 import 'routes/app_routes.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppSession.instance.init();
 
   final storage = SecureStorage(const FlutterSecureStorage());
   final apiClient = ApiClient(storage);
@@ -61,6 +65,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
+        Provider<ApiClient>.value(value: apiClient),
         ChangeNotifierProvider(create: (_) => AuthProvider(authService)),
         ChangeNotifierProvider(create: (_) => DashboardProvider(DashboardService(apiClient))),
         ChangeNotifierProvider(create: (_) => AttendanceProvider(AttendanceService(apiClient))),
@@ -81,6 +86,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => DocumentProvider(DocumentService(apiClient))),
         ChangeNotifierProvider(create: (_) => ReferralProvider(ReferralService(apiClient))),
         ChangeNotifierProvider(create: (_) => SalaryProvider(SalaryService(apiClient))),
+        ChangeNotifierProvider(create: (_) => EmployeeProvider(EmployeeApiService(apiClient))),
         ChangeNotifierProvider(create: (_) => NotificationProvider(NotificationService(apiClient))),
       ],
       child: const EmployeeManagementApp(),
@@ -104,7 +110,7 @@ class EmployeeManagementApp extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.background,
         useMaterial3: true,
       ),
-      home: const SplashScreen(),
+      home: const RoleSelectionScreen(),
       routes: AppRoutes.routes,
     );
   }

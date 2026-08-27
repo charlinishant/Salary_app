@@ -18,6 +18,7 @@ import documentRoutes from './routes/documentRoutes.js';
 import referralRoutes from './routes/referralRoutes.js';
 import salaryRoutes from './routes/salaryRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import reportRoutes from './routes/reportRoutes.js';
 import companyRoutes from './routes/companyRoutes.js';
 import branchRoutes from './routes/branchRoutes.js';
 import departmentRoutes from './routes/departmentRoutes.js';
@@ -55,6 +56,7 @@ app.use('/api/referrals', referralRoutes);
 app.use('/api/salary', salaryRoutes);
 app.use('/api/payslips', salaryRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

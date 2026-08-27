@@ -15,6 +15,19 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
+
+subprojects {
+    afterEvaluate {
+        if (plugins.hasPlugin("com.android.application") || plugins.hasPlugin("com.android.library")) {
+            extensions.configure<com.android.build.gradle.BaseExtension>("android") {
+                compileSdkVersion(36)
+            }
+            dependencies.add("implementation", "androidx.concurrent:concurrent-futures:1.1.0")
+            dependencies.add("implementation", "androidx.concurrent:concurrent-futures-ktx:1.1.0")
+        }
+    }
+}
+
 subprojects {
     project.evaluationDependsOn(":app")
 }

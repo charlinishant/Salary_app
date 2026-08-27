@@ -1,8 +1,66 @@
 import 'package:flutter/material.dart';
 import '../../../routes/app_routes.dart';
+import '../../employees/screens/admin_attendance_screen.dart';
+import '../../employees/screens/add_employee_screen.dart';
+import '../../employees/screens/employee_list_screen.dart';
 
 class MoreModulesScreen extends StatelessWidget {
   const MoreModulesScreen({super.key});
+
+  void _showEmployeeModuleModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Admin → Employees',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const CircleAvatar(backgroundColor: Color(0xFF0D9488), child: Icon(Icons.people, color: Colors.white)),
+              title: const Text('1. Employee List', style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: const Text('View, edit, search, filter and toggle status'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const EmployeeListScreen()));
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const CircleAvatar(backgroundColor: Color(0xFF0284C7), child: Icon(Icons.person_add, color: Colors.white)),
+              title: const Text('2. Add Employee', style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: const Text('Create new employee with sections A-E'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEmployeeScreen()));
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const CircleAvatar(backgroundColor: Color(0xFFD97706), child: Icon(Icons.co_present, color: Colors.white)),
+              title: const Text('3. Attendance Management', style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: const Text('View summary, selfies, and perform manual corrections'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminAttendanceScreen()));
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,44 +85,51 @@ class MoreModulesScreen extends StatelessWidget {
         children: [
           _buildModuleCard(
             context,
+            title: 'Admin → Employees',
+            icon: Icons.badge_outlined,
+            onTap: () => _showEmployeeModuleModal(context),
+          ),
+          const SizedBox(height: 12),
+          _buildModuleCard(
+            context,
             title: 'Company',
             icon: Icons.business_outlined,
-            route: AppRoutes.company,
+            onTap: () => Navigator.pushNamed(context, AppRoutes.company),
           ),
           const SizedBox(height: 12),
           _buildModuleCard(
             context,
             title: 'Branches',
             icon: Icons.domain_outlined,
-            route: AppRoutes.branches,
+            onTap: () => Navigator.pushNamed(context, AppRoutes.branches),
           ),
           const SizedBox(height: 12),
           _buildModuleCard(
             context,
             title: 'Departments',
             icon: Icons.corporate_fare_outlined,
-            route: AppRoutes.departments,
+            onTap: () => Navigator.pushNamed(context, AppRoutes.departments),
           ),
           const SizedBox(height: 12),
           _buildModuleCard(
             context,
             title: 'Roles & Permissions',
             icon: Icons.admin_panel_settings_outlined,
-            route: AppRoutes.roles,
+            onTap: () => Navigator.pushNamed(context, AppRoutes.roles),
           ),
           const SizedBox(height: 12),
           _buildModuleCard(
             context,
             title: 'Leave & Holidays',
             icon: Icons.beach_access_outlined,
-            route: AppRoutes.leaveHolidays,
+            onTap: () => Navigator.pushNamed(context, AppRoutes.leaveHolidays),
           ),
           const SizedBox(height: 12),
           _buildModuleCard(
             context,
             title: 'Shifts',
             icon: Icons.access_time_outlined,
-            route: AppRoutes.shifts,
+            onTap: () => Navigator.pushNamed(context, AppRoutes.shifts),
           ),
         ],
       ),
@@ -75,7 +140,7 @@ class MoreModulesScreen extends StatelessWidget {
     BuildContext context, {
     required String title,
     required IconData icon,
-    required String route,
+    required VoidCallback onTap,
   }) {
     return Container(
       height: 76,
@@ -88,9 +153,7 @@ class MoreModulesScreen extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
-          onTap: () {
-            Navigator.pushNamed(context, route);
-          },
+          onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(

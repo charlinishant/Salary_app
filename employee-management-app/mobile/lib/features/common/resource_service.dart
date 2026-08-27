@@ -8,6 +8,7 @@ class ResourceService {
   Future<List<Map<String, dynamic>>> list({Map<String, dynamic>? query}) async {
     final data = await api.get(endpoint, query: query);
     if (data is List) return data.cast<Map<String, dynamic>>();
+    if (data is Map && data['data'] is List) return (data['data'] as List).cast<Map<String, dynamic>>();
     return <Map<String, dynamic>>[];
   }
 

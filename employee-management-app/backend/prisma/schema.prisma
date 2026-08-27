@@ -344,10 +344,13 @@ model Attendance {
   lateMinutes         Int              @default(0)
   attendanceMode      String           @default("MANUAL")
   remarks             String?
+  updatedBy           String?
+  changeReason        String?
   employee            Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
 
+  @@unique([employeeId, attendanceDate])
   @@index([employeeId, attendanceDate])
 }
 

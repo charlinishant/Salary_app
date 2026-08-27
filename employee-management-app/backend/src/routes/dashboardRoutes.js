@@ -4,6 +4,9 @@ import { dashboardController } from '../controllers/dashboardController.js';
 
 const router = Router();
 
-router.get('/', requireAuth, dashboardController.index);
+router.use(requireAuth);
+router.get('/', dashboardController.index);
+router.get('/admin', dashboardController.adminSummary);
+router.get('/employee', dashboardController.employeeSummary);
 
 export default router;

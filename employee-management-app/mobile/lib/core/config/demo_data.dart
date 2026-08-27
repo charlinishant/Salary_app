@@ -1,12 +1,21 @@
 import '../../features/auth/models/employee_model.dart';
 
 class DemoData {
-  static final employee = EmployeeModel(
+  static final adminEmployee = EmployeeModel(
     id: 1,
-    employeeCode: 'EMP001',
-    name: 'Demo Employee',
-    email: 'demo@yogeshkrushi.com',
+    employeeCode: 'ADM001',
+    name: 'System Admin',
+    email: 'admin@example.com',
   );
+
+  static final regularEmployee = EmployeeModel(
+    id: 2,
+    employeeCode: 'EMP001',
+    name: 'Sample Employee',
+    email: 'employee@example.com',
+  );
+
+  static final employee = regularEmployee;
 
   static final dashboard = <String, dynamic>{
     'attendance': {

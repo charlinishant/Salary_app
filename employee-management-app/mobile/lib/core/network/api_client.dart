@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../config/api_config.dart';
+import '../session/app_session.dart';
 import '../storage/secure_storage.dart';
 import 'api_exception.dart';
 
@@ -7,13 +8,18 @@ class ApiClient {
   ApiClient(this._storage)
       : _dio = Dio(BaseOptions(
           baseUrl: ApiConfig.baseUrl,
-          connectTimeout: const Duration(seconds: 15),
-          receiveTimeout: const Duration(seconds: 20),
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
         )) {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
+        options.baseUrl = ApiConfig.baseUrl;
         final token = await _storage.readToken();
         if (token != null) options.headers['Authorization'] = 'Bearer $token';
+
+        // Development mode headers
+        options.headers.addAll(AppSession.instance.headers);
+
         handler.next(options);
       },
       onError: (error, handler) {
@@ -35,13 +41,14 @@ class ApiClient {
   Future<dynamic> get(String path, {Map<String, dynamic>? query}) => _unwrap(_dio.get(path, queryParameters: query));
   Future<dynamic> post(String path, {dynamic data}) => _unwrap(_dio.post(path, data: data));
   Future<dynamic> put(String path, {dynamic data}) => _unwrap(_dio.put(path, data: data));
+  Future<dynamic> patch(String path, {dynamic data}) => _unwrap(_dio.patch(path, data: data));
   Future<dynamic> delete(String path) => _unwrap(_dio.delete(path));
   Future<dynamic> multipart(String path, FormData data) => _unwrap(_dio.post(path, data: data));
 
   Future<dynamic> _unwrap(Future<Response<dynamic>> request) async {
     try {
       final response = await request;
-      return response.data is Map && response.data['data'] != null ? response.data['data'] : response.data;
+      return response.data;
     } on DioException catch (error) {
       if (error.error is ApiException) throw error.error as ApiException;
       throw ApiException(error.message ?? 'Network request failed', error.response?.statusCode);

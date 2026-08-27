@@ -8,6 +8,7 @@ import '../features/departments/screens/department_list_screen.dart';
 import '../features/documents/screens/documents_screen.dart';
 import '../features/expenses/screens/expenses_screen.dart';
 import '../features/holidays/screens/holidays_screen.dart';
+import '../features/leave/screens/admin_leave_requests_screen.dart';
 import '../features/leave/screens/leave_holidays_tab_screen.dart';
 import '../features/leave/screens/leave_screen.dart';
 import '../features/notes/screens/notes_screen.dart';
@@ -17,10 +18,23 @@ import '../features/salary/screens/salary_screen.dart';
 import '../features/shifts/screens/shift_list_screen.dart';
 import '../features/trips/screens/trips_screen.dart';
 
+class ModuleItem {
+  final String label;
+  final IconData icon;
+  final String route;
+
+  const ModuleItem({
+    required this.label,
+    required this.icon,
+    required this.route,
+  });
+}
+
 class AppRoutes {
   static const announcements = '/announcements';
   static const attendanceAlarms = '/attendance-alarms';
   static const leave = '/leave';
+  static const adminLeaveRequests = '/admin-leave-requests';
   static const leaveHolidays = '/leave-holidays';
   static const trips = '/trips';
   static const expenses = '/expenses';
@@ -35,10 +49,24 @@ class AppRoutes {
   static const roles = '/roles';
   static const shifts = '/shifts';
 
+  static final modules = <ModuleItem>[
+    const ModuleItem(label: 'Leave', icon: Icons.beach_access_outlined, route: leave),
+    const ModuleItem(label: 'Leave Approvals', icon: Icons.approval_outlined, route: adminLeaveRequests),
+    const ModuleItem(label: 'Trips', icon: Icons.directions_car_outlined, route: trips),
+    const ModuleItem(label: 'Expenses', icon: Icons.receipt_long_outlined, route: expenses),
+    const ModuleItem(label: 'Notes', icon: Icons.note_alt_outlined, route: notes),
+    const ModuleItem(label: 'Holidays', icon: Icons.event_outlined, route: holidays),
+    const ModuleItem(label: 'Documents', icon: Icons.folder_outlined, route: documents),
+    const ModuleItem(label: 'Referral', icon: Icons.card_giftcard_outlined, route: referral),
+    const ModuleItem(label: 'Salary', icon: Icons.account_balance_wallet_outlined, route: salary),
+    const ModuleItem(label: 'Announcements', icon: Icons.campaign_outlined, route: announcements),
+  ];
+
   static final routes = <String, WidgetBuilder>{
     announcements: (_) => const AnnouncementsScreen(),
     attendanceAlarms: (_) => const AttendanceAlarmsScreen(),
     leave: (_) => const LeaveScreen(),
+    adminLeaveRequests: (_) => const AdminLeaveRequestsScreen(),
     leaveHolidays: (_) => const LeaveHolidaysTabScreen(),
     trips: (_) => const TripsScreen(),
     expenses: (_) => const ExpensesScreen(),
