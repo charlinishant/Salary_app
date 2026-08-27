@@ -1,0 +1,653 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  EMPLOYEE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  LEAVE
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum DayPart {
+  FULL_DAY
+  HALF_DAY
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  STARTED
+  COMPLETED
+  CANCELLED
+}
+
+enum ExpenseStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+enum PaymentMode {
+  CASH
+  CARD
+  UPI
+  BANK_TRANSFER
+  OTHER
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PENDING
+  REJECTED
+  VERIFIED
+}
+
+enum ReferralStatus {
+  INVITED
+  REGISTERED
+  JOINED
+  REWARDED
+}
+
+enum PayrollStatus {
+  GENERATED
+  PAID
+  HOLD
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(EMPLOYEE)
+  isActive     Boolean  @default(true)
+  employee     Employee?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Company {
+  id               Int           @id @default(autoincrement())
+  name             String
+  legalName        String?
+  companyCode      String        @unique
+  industry         String?
+  email            String?
+  phone            String?
+  website          String?
+  logo             String?
+  address          String?
+  city             String?
+  state            String?
+  country          String?
+  postalCode       String?
+  gstin            String?
+  pan              String?
+  tan              String?
+  pfNumber         String?
+  esiNumber        String?
+  ptNumber         String?
+  currency         String        @default("INR")
+  timezone         String        @default("Asia/Kolkata")
+  weekStartDay     String        @default("Monday")
+  branches         Branch[]
+  departments      Department[]
+  leavePolicies    LeavePolicy[]
+  holidays         Holiday[]
+  shifts           Shift[]
+  employees        Employee[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model Branch {
+  id               Int               @id @default(autoincrement())
+  companyId        Int
+  name             String
+  code             String            @unique
+  address          String?
+  city             String?
+  state            String?
+  country          String?
+  postalCode       String?
+  phone            String?
+  email            String?
+  latitude         Decimal?          @db.Decimal(10, 7)
+  longitude        Decimal?          @db.Decimal(10, 7)
+  geofenceRadius   Float             @default(100)
+  timezone         String            @default("Asia/Kolkata")
+  managerId        Int?
+  isActive         Boolean           @default(true)
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  manager          Employee?         @relation("BranchManager", fields: [managerId], references: [id])
+  departments      Department[]
+  employees        Employee[]        @relation("BranchEmployees")
+  shifts           Shift[]
+  holidays         Holiday[]
+  biometricDevices BiometricDevice[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model Department {
+  id          Int        @id @default(autoincrement())
+  companyId   Int?
+  branchId    Int?
+  name        String
+  code        String?
+  description String?
+  headId      Int?
+  isActive    Boolean    @default(true)
+  company     Company?   @relation(fields: [companyId], references: [id])
+  branch      Branch?    @relation(fields: [branchId], references: [id])
+  head        Employee?  @relation("DepartmentHead", fields: [headId], references: [id])
+  employees   Employee[] @relation("DepartmentEmployees")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([name, companyId])
+}
+
+model Designation {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  employees Employee[]
+}
+
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  description String?
+  isSystem    Boolean          @default(false)
+  permissions RolePermission[]
+  employees   Employee[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model Permission {
+  id          Int              @id @default(autoincrement())
+  code        String           @unique
+  category    String
+  name        String
+  description String?
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  id           Int        @id @default(autoincrement())
+  roleId       Int
+  permissionId Int
+  canView      Boolean    @default(true)
+  canCreate    Boolean    @default(false)
+  canEdit      Boolean    @default(false)
+  canApprove   Boolean    @default(false)
+  canDelete    Boolean    @default(false)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+model Employee {
+  id                 Int                  @id @default(autoincrement())
+  userId             Int                  @unique
+  employeeCode       String               @unique
+  profilePhoto       String?
+  firstName          String
+  lastName           String
+  email              String               @unique
+  phone              String?
+  gender             Gender?
+  dateOfBirth        DateTime?
+  address            String?
+  companyId          Int?
+  branchId           Int?
+  departmentId       Int?
+  designationId      Int?
+  roleId             Int?
+  joiningDate        DateTime?
+  employmentType     EmploymentType       @default(FULL_TIME)
+  reportingManager   String?
+  reportingManagerId Int?
+  shiftId            Int?
+  workLocation       String?
+  bankName           String?
+  accountNumber      String?
+  ifsc               String?
+  branch             String?
+  accountHolderName  String?
+  upiId              String?
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company            Company?             @relation(fields: [companyId], references: [id])
+  branchRef          Branch?              @relation("BranchEmployees", fields: [branchId], references: [id])
+  department         Department?          @relation("DepartmentEmployees", fields: [departmentId], references: [id])
+  designation        Designation?         @relation(fields: [designationId], references: [id])
+  roleRef            Role?                @relation(fields: [roleId], references: [id])
+  shift              Shift?               @relation(fields: [shiftId], references: [id])
+  managerOfBranches  Branch[]             @relation("BranchManager")
+  headOfDepartments  Department[]         @relation("DepartmentHead")
+  shiftAssignments   ShiftAssignment[]
+  attendance         Attendance[]
+  leaveBalances      LeaveBalance[]
+  leaveRequests      LeaveRequest[]
+  trips              Trip[]
+  meetings           Meeting[]
+  expenses           Expense[]
+  notes              EmployeeNote[]
+  documents          EmployeeDocument[]
+  referrals          Referral[]
+  salaryStructure    SalaryStructure[]
+  payrolls           Payroll[]
+  payslips           Payslip[]
+  notifications      Notification[]
+  biometricMapping   BiometricUserMapping?
+  auditLogs          AuditLog[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+}
+
+model Shift {
+  id                Int               @id @default(autoincrement())
+  companyId         Int?
+  branchId          Int?
+  name              String
+  code              String?           @unique
+  startTime         String
+  endTime           String
+  graceMinutes      Int               @default(15)
+  halfDayHours      Float             @default(4)
+  fullDayHours      Float             @default(8)
+  breakMinutes      Int               @default(60)
+  earlyCheckInLimit Int               @default(60)
+  lateMarkAfter     Int               @default(15)
+  earlyExitBefore   Int               @default(15)
+  overtimeAfter     Int               @default(480)
+  weeklyOff         String            @default("Sunday")
+  isOvernight       Boolean           @default(false)
+  isActive          Boolean           @default(true)
+  company           Company?          @relation(fields: [companyId], references: [id])
+  branch            Branch?           @relation(fields: [branchId], references: [id])
+  employees         Employee[]
+  shiftAssignments  ShiftAssignment[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model ShiftAssignment {
+  id            Int       @id @default(autoincrement())
+  employeeId    Int
+  shiftId       Int
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  assignedBy    String?
+  employee      Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  shift         Shift     @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Attendance {
+  id                  Int              @id @default(autoincrement())
+  employeeId          Int
+  attendanceDate      DateTime
+  punchInTime         DateTime?
+  punchOutTime        DateTime?
+  punchInSelfie       String?
+  punchOutSelfie      String?
+  punchInLatitude     Decimal?         @db.Decimal(10, 7)
+  punchInLongitude    Decimal?         @db.Decimal(10, 7)
+  punchOutLatitude    Decimal?         @db.Decimal(10, 7)
+  punchOutLongitude   Decimal?         @db.Decimal(10, 7)
+  punchInAddress      String?
+  punchOutAddress     String?
+  totalWorkingMinutes Int?
+  attendanceStatus    AttendanceStatus @default(PRESENT)
+  lateMinutes         Int              @default(0)
+  attendanceMode      String           @default("MANUAL")
+  remarks             String?
+  employee            Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  @@index([employeeId, attendanceDate])
+}
+
+model Announcement {
+  id            Int      @id @default(autoincrement())
+  title         String
+  message       String   @db.Text
+  publishedAt   DateTime @default(now())
+  attachmentUrl String?
+  priority      Priority @default(NORMAL)
+  createdBy     String
+  createdAt     DateTime @default(now())
+}
+
+model LeaveType {
+  id               Int            @id @default(autoincrement())
+  name             String         @unique
+  code             String?        @unique
+  isLimited        Boolean        @default(true)
+  isPaid           Boolean        @default(true)
+  annualAllocation Float          @default(12)
+  carryForward     Boolean        @default(false)
+  maxCarryForward  Float          @default(0)
+  requiresApproval Boolean        @default(true)
+  halfDayAllowed   Boolean        @default(true)
+  color            String?        @default("#3B82F6")
+  isActive         Boolean        @default(true)
+  balances         LeaveBalance[]
+  requests         LeaveRequest[]
+  policies         LeavePolicy[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model LeavePolicy {
+  id                    Int       @id @default(autoincrement())
+  name                  String
+  companyId             Int?
+  leaveTypeId           Int
+  annualBalance         Float
+  monthlyAccrual        Float     @default(1.0)
+  carryForward          Boolean   @default(false)
+  maxConsecutiveDays    Int       @default(14)
+  minNoticePeriodDays   Int       @default(1)
+  docsRequiredAfterDays Int       @default(3)
+  allowNegativeBalance  Boolean   @default(false)
+  approvalRequired      Boolean   @default(true)
+  approvalFlow          String    @default("MANAGER_THEN_HR")
+  isActive              Boolean   @default(true)
+  company               Company?  @relation(fields: [companyId], references: [id])
+  leaveType             LeaveType @relation(fields: [leaveTypeId], references: [id], onDelete: Cascade)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model LeaveBalance {
+  id            Int       @id @default(autoincrement())
+  employeeId    Int
+  leaveTypeId   Int
+  totalDays     Float
+  usedDays      Float     @default(0)
+  remainingDays Float
+  employee      Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveType     LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  @@unique([employeeId, leaveTypeId])
+}
+
+model LeaveRequest {
+  id              Int         @id @default(autoincrement())
+  employeeId      Int
+  leaveTypeId     Int
+  fromDate        DateTime
+  toDate          DateTime
+  numberOfDays    Float
+  dayPart         DayPart     @default(FULL_DAY)
+  reason          String      @db.Text
+  attachmentUrl   String?
+  status          LeaveStatus @default(PENDING)
+  approvedBy      String?
+  rejectionReason String?     @db.Text
+  employee        Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveType       LeaveType   @relation(fields: [leaveTypeId], references: [id])
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Trip {
+  id                Int      @id @default(autoincrement())
+  employeeId        Int
+  fromLocation      String
+  destination       String
+  startDate         DateTime
+  startTime         String
+  endDate           DateTime?
+  endTime           String?
+  purpose           String
+  client            String?
+  estimatedDistance Float?
+  notes             String?  @db.Text
+  employee          Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Meeting {
+  id              Int           @id @default(autoincrement())
+  employeeId      Int
+  meetingTitle    String
+  clientName      String?
+  meetingLocation String?
+  latitude        Decimal?      @db.Decimal(10, 7)
+  longitude       Decimal?      @db.Decimal(10, 7)
+  meetingDate     DateTime
+  startTime       String
+  endTime         String?
+  notes           String?       @db.Text
+  meetingStatus   MeetingStatus @default(SCHEDULED)
+  employee        Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Expense {
+  id          Int                 @id @default(autoincrement())
+  employeeId  Int
+  expenseType String
+  amount      Decimal             @db.Decimal(12, 2)
+  date        DateTime
+  description String?             @db.Text
+  tripId      Int?
+  paymentMode PaymentMode         @default(OTHER)
+  status      ExpenseStatus       @default(PENDING)
+  employee    Employee            @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  attachments ExpenseAttachment[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model ExpenseAttachment {
+  id        Int      @id @default(autoincrement())
+  expenseId Int
+  fileUrl   String
+  expense   Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model EmployeeNote {
+  id            Int      @id @default(autoincrement())
+  employeeId    Int
+  title         String
+  note          String   @db.Text
+  attachmentUrl String?
+  employee      Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Holiday {
+  id          Int      @id @default(autoincrement())
+  companyId   Int?
+  branchId    Int?
+  name        String
+  date        DateTime
+  day         String
+  holidayType String   @default("Company")
+  isOptional  Boolean  @default(false)
+  description String?
+  company     Company? @relation(fields: [companyId], references: [id])
+  branch      Branch?  @relation(fields: [branchId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
+model EmployeeDocument {
+  id           Int            @id @default(autoincrement())
+  employeeId   Int
+  documentType String
+  fileUrl      String?
+  status       DocumentStatus @default(PENDING)
+  remarks      String?
+  employee     Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model Referral {
+  id             Int            @id @default(autoincrement())
+  employeeId     Int
+  referralCode   String
+  referralLink   String
+  candidateName  String?
+  candidateEmail String?
+  status         ReferralStatus @default(INVITED)
+  employee       Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdAt      DateTime       @default(now())
+}
+
+model SalaryStructure {
+  id              Int      @id @default(autoincrement())
+  employeeId      Int
+  basic           Decimal  @db.Decimal(12, 2)
+  hra             Decimal  @db.Decimal(12, 2)
+  allowances      Decimal  @db.Decimal(12, 2)
+  grossSalary     Decimal  @db.Decimal(12, 2)
+  pf              Decimal  @db.Decimal(12, 2)
+  professionalTax Decimal  @db.Decimal(12, 2)
+  otherDeductions Decimal  @db.Decimal(12, 2)
+  netSalary       Decimal  @db.Decimal(12, 2)
+  effectiveFrom   DateTime
+  employee        Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+model Payroll {
+  id          Int           @id @default(autoincrement())
+  employeeId  Int
+  month       Int
+  year        Int
+  grossSalary Decimal       @db.Decimal(12, 2)
+  netSalary   Decimal       @db.Decimal(12, 2)
+  status      PayrollStatus @default(GENERATED)
+  employee    Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  payslip     Payslip?
+  createdAt   DateTime      @default(now())
+}
+
+model Payslip {
+  id          Int      @id @default(autoincrement())
+  employeeId  Int
+  payrollId   Int      @unique
+  month       Int
+  year        Int
+  amount      Decimal  @db.Decimal(12, 2)
+  status      String   @default("Paid")
+  pdfUrl      String?
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  payroll     Payroll  @relation(fields: [payrollId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id         Int       @id @default(autoincrement())
+  employeeId Int
+  title      String
+  message    String
+  type       String
+  readAt     DateTime?
+  employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+}
+
+model AuditLog {
+  id         Int       @id @default(autoincrement())
+  employeeId Int?
+  action     String
+  module     String
+  entity     String
+  entityId   Int?
+  oldValue   String?   @db.Text
+  newValue   String?   @db.Text
+  ipAddress  String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  createdAt  DateTime  @default(now())
+}
+
+model BiometricDevice {
+  id           Int                    @id @default(autoincrement())
+  branchId     Int?
+  name         String
+  deviceCode   String                 @unique
+  serialNumber String?
+  ipAddress    String?
+  port         Int?                   @default(4370)
+  status       String                 @default("ACTIVE")
+  lastSyncAt   DateTime?
+  branch       Branch?                @relation(fields: [branchId], references: [id])
+  mappings     BiometricUserMapping[]
+  events       BiometricEvent[]
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+}
+
+model BiometricUserMapping {
+  id           Int             @id @default(autoincrement())
+  employeeId   Int             @unique
+  deviceId     Int
+  deviceUserId String
+  employee     Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  device       BiometricDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  createdAt    DateTime        @default(now())
+}
+
+model BiometricEvent {
+  id           Int             @id @default(autoincrement())
+  deviceId     Int
+  deviceUserId String
+  eventTime    DateTime
+  eventType    String          @default("CHECK_IN")
+  rawPayload   String?         @db.Text
+  processed    Boolean         @default(false)
+  device       BiometricDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  createdAt    DateTime        @default(now())
+}
