@@ -8,7 +8,7 @@ const router = Router();
 router.use(requireAuth);
 
 router.get('/me', employeeController.me);
-router.put('/me', employeeController.updateMe);
+router.put('/me', upload.single('profilePhoto'), employeeController.updateMe);
 
 router.get('/', employeeController.list);
 router.get('/:id', employeeController.getById);

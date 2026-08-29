@@ -232,12 +232,16 @@ class _AdminLeaveRequestsScreenState extends State<AdminLeaveRequestsScreen>
           final empCode = emp['employeeCode'] ?? 'EMP';
           final deptName = emp['department']?['name'] ?? 'General';
           final leaveTypeName = item['leaveType']?['name'] ?? item['leaveType'] ?? 'Leave';
-          final startDate = item['startDate'] != null
-              ? DateFormat('dd MMM yyyy').format(DateTime.parse(item['startDate']))
-              : '';
-          final endDate = item['endDate'] != null
-              ? DateFormat('dd MMM yyyy').format(DateTime.parse(item['endDate']))
-              : '';
+          final startDate = item['fromDate'] != null
+              ? DateFormat('dd MMM yyyy').format(DateTime.parse(item['fromDate']))
+              : (item['startDate'] != null
+                  ? DateFormat('dd MMM yyyy').format(DateTime.parse(item['startDate']))
+                  : 'N/A');
+          final endDate = item['toDate'] != null
+              ? DateFormat('dd MMM yyyy').format(DateTime.parse(item['toDate']))
+              : (item['endDate'] != null
+                  ? DateFormat('dd MMM yyyy').format(DateTime.parse(item['endDate']))
+                  : startDate);
           final numDays = item['numberOfDays'] ?? 1;
           final reason = item['reason'] ?? 'No reason provided';
           final isProcessing = _actionRunningId == id.toString();

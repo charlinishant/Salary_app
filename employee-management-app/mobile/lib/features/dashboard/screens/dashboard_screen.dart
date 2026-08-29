@@ -11,9 +11,12 @@ import '../../employees/screens/admin_attendance_screen.dart';
 import '../../employees/screens/add_employee_screen.dart';
 import '../../employees/screens/employee_list_screen.dart';
 import '../../employees/screens/employee_profile_screen.dart';
+import '../../expenses/screens/request_reimbursement_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  const DashboardScreen({super.key, this.onMarkAttendanceTap});
+
+  final VoidCallback? onMarkAttendanceTap;
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -79,101 +82,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // PROMINENT 1-TAP VIEW TOGGLE (ADMIN VIEW vs EMPLOYEE VIEW)
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFCBD5E1)),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => authProvider.switchToAdminView(),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isAdminView ? const Color(0xFF1E293B) : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.admin_panel_settings,
-                              size: 18,
-                              color: isAdminView ? Colors.white : Colors.grey[700],
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Admin View',
-                              style: TextStyle(
-                                color: isAdminView ? Colors.white : Colors.grey[700],
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => authProvider.switchToEmployeeView(),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: !isAdminView ? const Color(0xFF0D9488) : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.person_pin_circle_rounded,
-                              size: 18,
-                              color: !isAdminView ? Colors.white : Colors.grey[700],
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Employee View',
-                              style: TextStyle(
-                                color: !isAdminView ? Colors.white : Colors.grey[700],
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
             // Header User Greeting Card
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
+                ],
               ),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 28,
-                    backgroundColor: isAdminView ? const Color(0xFF1E293B) : const Color(0xFF0D9488),
+                    backgroundColor: const Color(0xFF00BFA5),
                     backgroundImage: employee?.profilePhoto != null
                         ? NetworkImage(employee!.profilePhoto!.startsWith('http') ? employee.profilePhoto! : '$baseUrl${employee.profilePhoto}')
                         : null,
@@ -190,20 +113,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isAdminView ? 'Active Mode: ADMIN' : 'Active Mode: EMPLOYEE',
+                          'Welcome Back 👋',
                           style: TextStyle(
-                            color: isAdminView ? const Color(0xFF1E293B) : const Color(0xFF0D9488),
-                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[600],
                             fontSize: 12,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
+                        const SizedBox(height: 2),
                         Text(
-                          employee?.name ?? (isAdminView ? 'System Administrator' : 'Kuldeep Kumavat'),
+                          employee?.name ?? 'Employee',
                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
                         ),
+                        const SizedBox(height: 2),
                         Text(
-                          '${employee?.employeeCode ?? (isAdminView ? 'ADM-001' : 'EMP-0025')} • Tap toggle above to change mode',
-                          style: const TextStyle(color: Colors.grey, fontSize: 11),
+                          '${employee?.employeeCode ?? "EMP-0001"} • ${employee?.departmentName ?? "General Department"}',
+                          style: const TextStyle(color: Color(0xFF00BFA5), fontSize: 12, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
@@ -258,14 +183,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 20),
             ],
 
-            // IF EMPLOYEE VIEW ACTIVE (or on both): Show Camera Selfie Attendance Card
-            const Text(
-              'Selfie Attendance Portal',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1E293B)),
-            ),
-            const SizedBox(height: 10),
-
-            // SALARYBOX-STYLE CAMERA SELFIE ATTENDANCE CARD
+            // Unified Attendance Summary & Launcher Card
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
@@ -282,7 +200,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        "Today's Attendance",
+                        "Today's Attendance Status",
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1E293B)),
                       ),
                       Container(
@@ -292,7 +210,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          isPunchedOut ? 'Completed' : (isPunchedIn ? 'Present' : 'Not Punched In'),
+                          isPunchedOut ? 'Completed' : (isPunchedIn ? 'Present' : 'Absent'),
                           style: TextStyle(
                             color: (isPunchedIn || isPunchedOut) ? Colors.green : Colors.red,
                             fontWeight: FontWeight.bold,
@@ -343,39 +261,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   const SizedBox(height: 18),
 
-                  // Dynamic Punch Button
+                  // Open Mark Attendance Tab Button
                   SizedBox(
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isPunchedOut
-                            ? Colors.grey
-                            : (isPunchedIn ? const Color(0xFFDC2626) : const Color(0xFF0D9488)),
+                        backgroundColor: const Color(0xFF00BFA5),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         elevation: 2,
                       ),
-                      icon: Icon(
-                        isPunchedOut ? Icons.check_circle : (isPunchedIn ? Icons.logout : Icons.camera_front),
-                        color: Colors.white,
-                      ),
+                      icon: const Icon(Icons.fingerprint, color: Colors.white, size: 22),
                       label: Text(
-                        isPunchedOut ? 'ATTENDANCE COMPLETED TODAY' : (isPunchedIn ? 'PUNCH OUT' : 'MARK ATTENDANCE'),
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                        isPunchedIn ? 'OPEN ATTENDANCE (PUNCH OUT)' : 'OPEN MARK ATTENDANCE',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14, letterSpacing: 0.5),
                       ),
-                      onPressed: isPunchedOut
-                          ? null
-                          : () async {
-                              final updated = await Navigator.push<bool>(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => AttendanceCameraScreen(isPunchIn: !isPunchedIn),
-                                ),
-                              );
-                              if (updated == true && context.mounted) {
-                                context.read<AttendanceProvider>().loadToday();
-                              }
-                            },
+                      onPressed: () {
+                        if (widget.onMarkAttendanceTap != null) {
+                          widget.onMarkAttendanceTap!();
+                        }
+                      },
                     ),
                   ),
                 ],
@@ -432,6 +337,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 _buildGridOption(
                   context,
+                  title: 'Reimbursement',
+                  icon: Icons.receipt_long,
+                  color: const Color(0xFF00C292),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const RequestReimbursementScreen()),
+                    );
+                  },
+                ),
+                _buildGridOption(
+                  context,
                   title: 'Request Leave',
                   icon: Icons.beach_access_outlined,
                   color: Colors.green,
@@ -457,6 +374,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   icon: Icons.event_outlined,
                   color: Colors.pink,
                   onTap: () => Navigator.pushNamed(context, AppRoutes.holidays),
+                ),
+                _buildGridOption(
+                  context,
+                  title: 'Add Document',
+                  icon: Icons.folder_open,
+                  color: const Color(0xFF0284C7),
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.documents),
                 ),
                 _buildGridOption(
                   context,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/network/api_client.dart';
+import 'bank_account_details_screen.dart';
 
 class AdminEmployeeProfileScreen extends StatefulWidget {
   const AdminEmployeeProfileScreen({
@@ -191,18 +192,36 @@ class _AdminEmployeeProfileScreenState extends State<AdminEmployeeProfileScreen>
             _buildInfoRow('Joining Date', emp['joiningDate'] ?? '2024-01-15'),
           ]),
           const SizedBox(height: 14),
-          _buildInfoSection('Bank Details', [
-            _buildInfoRow('Bank Name', emp['bankName'] ?? 'HDFC Bank'),
-            _buildInfoRow('Account Number', emp['accountNumber'] ?? '50100234567890'),
-            _buildInfoRow('IFSC Code', emp['ifsc'] ?? 'HDFC0001234'),
-            _buildInfoRow('UPI ID', emp['upiId'] ?? 'user@okaxis'),
-          ]),
+          _buildInfoSection(
+            'Bank Details',
+            [
+              _buildInfoRow('Bank Name', emp['bankName'] ?? 'HDFC Bank'),
+              _buildInfoRow('Account Number', emp['accountNumber'] ?? '50100234567890'),
+              _buildInfoRow('IFSC Code', emp['ifsc'] ?? 'HDFC0001234'),
+              _buildInfoRow('UPI ID', emp['upiId'] ?? 'user@okaxis'),
+            ],
+            onEdit: () async {
+              final updated = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BankAccountDetailsScreen(
+                    employeeId: widget.employeeId,
+                    employeeName: '${emp['firstName'] ?? ''} ${emp['lastName'] ?? ''}'.trim(),
+                    initialData: emp,
+                  ),
+                ),
+              );
+              if (updated == true && mounted) {
+                _fetchProfile();
+              }
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoSection(String title, List<Widget> children) {
+  Widget _buildInfoSection(String title, List<Widget> children, {VoidCallback? onEdit}) {
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -211,7 +230,20 @@ class _AdminEmployeeProfileScreenState extends State<AdminEmployeeProfileScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary)),
+                if (onEdit != null)
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, size: 20, color: AppColors.primary),
+                    onPressed: onEdit,
+                    tooltip: 'Edit $title',
+                    constraints: const BoxConstraints(),
+                    padding: EdgeInsets.zero,
+                  ),
+              ],
+            ),
             const Divider(),
             ...children,
           ],

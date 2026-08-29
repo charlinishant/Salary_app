@@ -33,6 +33,8 @@ class BranchProvider with ChangeNotifier {
     _error = null;
     notifyListeners();
 
+
+
     try {
       _branches = await _service.fetchBranches(
         search: _searchQuery,
@@ -91,3 +93,4 @@ class BranchProvider with ChangeNotifier {
     }
   }
 }
+

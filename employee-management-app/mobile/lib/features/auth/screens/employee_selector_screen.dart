@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/session/app_session.dart';
+import '../providers/auth_provider.dart';
 import '../../employees/models/employee_model.dart';
 import '../../employees/providers/employee_provider.dart';
+import '../../dashboard/screens/employee_shell.dart';
 import '../../dashboard/screens/employee_home_shell.dart';
 import 'role_selection_screen.dart';
 
@@ -193,8 +195,10 @@ class _EmployeeSelectorScreenState extends State<EmployeeSelectorScreen> {
                       code: target.employeeCode,
                     );
                     if (!context.mounted) return;
+                    await context.read<AuthProvider>().login(target.employeeCode, 'Password@123');
+                    if (!context.mounted) return;
                     Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const EmployeeHomeShell()),
+                      MaterialPageRoute(builder: (_) => const EmployeeShell()),
                     );
                   }
                 },

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/network/api_client.dart';
 import '../../../routes/app_routes.dart';
+import '../../leave/screens/admin_leave_requests_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -82,6 +83,78 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // PROMINENT LEAVE APPLICATIONS BANNER
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const AdminLeaveRequestsScreen()),
+                        ).then((_) => _fetchDashboardData());
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF0D9488).withOpacity(0.3),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.beach_access, color: Colors.white, size: 28),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Leave Applications',
+                                    style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${_summary['pendingLeaves'] ?? 0} Pending for Approval',
+                                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Row(
+                                children: [
+                                  Text('Review', style: TextStyle(color: Color(0xFF0F766E), fontWeight: FontWeight.bold, fontSize: 12)),
+                                  SizedBox(width: 4),
+                                  Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFF0F766E)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
                     const Text('Executive Summary', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
 
@@ -103,7 +176,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         _buildStatCard('Punched In', _summary['punchedIn'] ?? 0, Icons.login, Colors.teal),
                         _buildStatCard('Punch Completed', _summary['punchCompleted'] ?? 0, Icons.logout, Colors.indigo),
                         _buildStatCard('Pending Leaves', _summary['pendingLeaves'] ?? 0, Icons.pending_actions, Colors.amber.shade900, onTap: () {
-                          Navigator.pushNamed(context, AppRoutes.adminLeaveRequests);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const AdminLeaveRequestsScreen()),
+                          ).then((_) => _fetchDashboardData());
                         }),
                         _buildStatCard('Pending Expenses', _summary['pendingExpenses'] ?? 0, Icons.payments_outlined, Colors.deepOrange),
                       ],

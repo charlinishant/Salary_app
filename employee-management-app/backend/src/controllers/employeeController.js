@@ -42,9 +42,21 @@ export const employeeController = {
       upiId,
     }) => ({ phone, address, bankName, accountNumber, ifsc, branch, accountHolderName, upiId }))(req.body);
 
+    const updateData = Object.fromEntries(Object.entries(allowed).filter(([, value]) => value !== undefined));
+    if (req.file) {
+      updateData.profilePhoto = `/${req.file.path.replaceAll('\\', '/')}`;
+    }
+
     const data = await prisma.employee.update({
       where: { id: req.user.employeeId },
-      data: Object.fromEntries(Object.entries(allowed).filter(([, value]) => value !== undefined)),
+      data: updateData,
+      include: {
+        department: true,
+        designation: true,
+        shift: true,
+        roleRef: true,
+        user: { select: { email: true, role: true, isActive: true } },
+      },
     });
     res.json({ success: true, data });
   }),

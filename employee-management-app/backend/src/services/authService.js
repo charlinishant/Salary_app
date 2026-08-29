@@ -11,9 +11,24 @@ const publicEmployee = {
   lastName: true,
   email: true,
   phone: true,
+  gender: true,
+  dateOfBirth: true,
+  address: true,
   profilePhoto: true,
+  joiningDate: true,
+  employmentType: true,
+  reportingManager: true,
+  workLocation: true,
+  bankName: true,
+  accountNumber: true,
+  ifsc: true,
+  branch: true,
+  accountHolderName: true,
+  upiId: true,
   department: true,
   designation: true,
+  shift: true,
+  roleRef: true,
 };
 
 export const authService = {
@@ -22,21 +37,48 @@ export const authService = {
       where: {
         OR: [{ email: identifier }, { employee: { employeeCode: identifier } }],
       },
-      include: { employee: { select: publicEmployee } },
+      include: { employee: { include: { department: true, designation: true, shift: true, roleRef: true } } },
     });
 
     if (!user || !user.isActive) throw new HttpError(401, 'Invalid credentials');
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) throw new HttpError(401, 'Invalid credentials');
 
-    const token = jwt.sign({ userId: user.id, employeeId: user.employee.id }, env.jwtSecret, {
+    const emp = user.employee || {};
+    const employeePayload = {
+      ...emp,
+      name: `${emp.firstName || ''} ${emp.lastName || ''}`.trim(),
+      role: user.role,
+    };
+
+    const token = jwt.sign({ userId: user.id, employeeId: user.employee?.id }, env.jwtSecret, {
       expiresIn: env.jwtExpiresIn,
     });
 
-    return { token, employee: user.employee };
+    return { token, employee: employeePayload, data: employeePayload };
   },
-  me: (userId) => prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true, email: true, role: true, employee: { select: publicEmployee } },
-  }),
+
+  me: async (userId) => {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        employee: {
+          include: { department: true, designation: true, shift: true, roleRef: true },
+        },
+      },
+    });
+    if (!user) return null;
+    const emp = user.employee || {};
+    return {
+      ...emp,
+      name: `${emp.firstName || ''} ${emp.lastName || ''}`.trim(),
+      role: user.role,
+      user: { id: user.id, email: user.email, role: user.role },
+    };
+  },
 };
+
+

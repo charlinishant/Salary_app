@@ -82,6 +82,12 @@ class EmployeeProvider extends ChangeNotifier {
     return res;
   }
 
+  Future<Map<String, dynamic>> updateMyProfile({Map<String, dynamic>? data, String? photoPath}) async {
+    final res = await _service.updateMe(data: data, photoPath: photoPath);
+    await loadList();
+    return res;
+  }
+
   Future<void> toggleStatus(int id, bool isActive) async {
     await _service.toggleStatus(id, isActive);
     await loadList();

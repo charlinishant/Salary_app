@@ -11,71 +11,109 @@ class AuthProvider extends ChangeNotifier {
   AppState<EmployeeModel> state = const AppState();
 
   bool get isAuthenticated => state.data != null;
-  bool get isAdmin => state.data?.email == 'admin@example.com' || (state.data?.employeeCode.startsWith('ADM') ?? true);
+  bool get isAdmin =>
+      state.data?.email == 'admin@example.com' ||
+      (state.data?.employeeCode.startsWith('ADM') ?? false);
 
   Future<void> bootstrap() async {
     state = const AppState(status: LoadStatus.loading);
     notifyListeners();
-    if (AppConfig.demoMode) {
-      state = AppState(status: LoadStatus.success, data: DemoData.adminEmployee);
-      notifyListeners();
-      return;
-    }
     try {
       final employee = await _service.me();
       if (employee != null) {
         state = AppState(status: LoadStatus.success, data: employee);
       } else {
-        // Direct auto-login without showing login screen
-        state = AppState(status: LoadStatus.success, data: DemoData.adminEmployee);
+        // Auto-login to backend with first active employee or admin
+        try {
+          final loggedEmp = await _service.login('EMP-0021', 'Password@123');
+          state = AppState(status: LoadStatus.success, data: loggedEmp);
+        } catch (_) {
+          final loggedAdmin =
+              await _service.login('admin@example.com', 'Password@123');
+          state = AppState(status: LoadStatus.success, data: loggedAdmin);
+        }
       }
     } catch (_) {
-      // Auto-fallback to Admin session directly
-      state = AppState(status: LoadStatus.success, data: DemoData.adminEmployee);
+      try {
+        final loggedEmp =
+            await _service.login('admin@example.com', 'Password@123');
+        state = AppState(status: LoadStatus.success, data: loggedEmp);
+      } catch (e) {
+        state =
+            AppState(status: LoadStatus.success, data: DemoData.adminEmployee);
+      }
     }
     notifyListeners();
   }
 
-  void switchToAdminView() {
-    state = AppState(status: LoadStatus.success, data: DemoData.adminEmployee);
+  Future<void> loadMe() async {
+    try {
+      final emp = await _service.me();
+      if (emp != null) {
+        state = AppState(status: LoadStatus.success, data: emp);
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
+
+  Future<void> switchToAdminView() async {
+    state = const AppState(status: LoadStatus.loading);
+    notifyListeners();
+    try {
+      final emp = await _service.login('admin@example.com', 'Password@123');
+      state = AppState(status: LoadStatus.success, data: emp);
+    } catch (_) {
+      state =
+          AppState(status: LoadStatus.success, data: DemoData.adminEmployee);
+    }
     notifyListeners();
   }
 
-  void switchToEmployeeView() {
-    state = AppState(status: LoadStatus.success, data: DemoData.regularEmployee);
+  Future<void> switchToEmployeeView() async {
+    state = const AppState(status: LoadStatus.loading);
+    notifyListeners();
+    try {
+      final emp = await _service.login('EMP-0021', 'Password@123');
+      state = AppState(status: LoadStatus.success, data: emp);
+    } catch (_) {
+      try {
+        final emp =
+            await _service.login('morenishant118@gmail.com', 'Password@123');
+        state = AppState(status: LoadStatus.success, data: emp);
+      } catch (_) {
+        state = AppState(
+            status: LoadStatus.success, data: DemoData.regularEmployee);
+      }
+    }
     notifyListeners();
   }
 
   Future<void> login(String identifier, String password) async {
     state = const AppState(status: LoadStatus.loading);
     notifyListeners();
-    final isAdm = identifier.toLowerCase().contains('admin') || identifier.toUpperCase().contains('ADM');
-    final fallbackData = isAdm ? DemoData.adminEmployee : DemoData.regularEmployee;
-
-    if (AppConfig.demoMode) {
-      state = AppState(status: LoadStatus.success, data: fallbackData);
-      notifyListeners();
-      return;
-    }
     try {
       final employee = await _service.login(identifier, password);
       state = AppState(status: LoadStatus.success, data: employee);
     } catch (error) {
-      state = AppState(status: LoadStatus.success, data: fallbackData);
+      final isAdm = identifier.toLowerCase().contains('admin') ||
+          identifier.toUpperCase().contains('ADM');
+      state = AppState(
+          status: LoadStatus.success,
+          data: isAdm ? DemoData.adminEmployee : DemoData.regularEmployee);
     }
     notifyListeners();
   }
 
   Future<void> loginAsAdmin() async {
-    switchToAdminView();
+    await switchToAdminView();
   }
 
   Future<void> loginAsEmployee() async {
-    switchToEmployeeView();
+    await switchToEmployeeView();
   }
 
   Future<void> logout() async {
-    // Instead of logging out to a form, reset to Admin View directly
-    switchToAdminView();
+    await _service.logout();
+    await switchToAdminView();
   }
 }

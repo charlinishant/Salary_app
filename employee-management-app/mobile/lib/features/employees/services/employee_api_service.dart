@@ -49,6 +49,16 @@ class EmployeeApiService {
     return res is Map<String, dynamic> ? res : {'success': true};
   }
 
+  Future<Map<String, dynamic>> updateMe({Map<String, dynamic>? data, String? photoPath}) async {
+    final formMap = data != null ? Map<String, dynamic>.from(data) : <String, dynamic>{};
+    if (photoPath != null && photoPath.isNotEmpty) {
+      formMap['profilePhoto'] = await MultipartFile.fromFile(photoPath, filename: 'profile.jpg');
+    }
+    final form = FormData.fromMap(formMap);
+    final res = await api.multipart('/employees/me', form);
+    return res is Map<String, dynamic> ? res : {'success': true};
+  }
+
   Future<void> toggleStatus(int id, bool isActive) async {
     await api.post('/employees/$id/status', data: {'isActive': isActive});
   }

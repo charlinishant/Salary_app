@@ -1,27 +1,8 @@
-import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/config/demo_data.dart';
 import '../../../shared/models/app_state.dart';
 import '../services/attendance_service.dart';
-
-class AttendanceModelData {
-  AttendanceModelData({
-    required this.canPunchIn,
-    required this.canPunchOut,
-    this.checkIn,
-    this.checkOut,
-    this.workingHoursFormatted,
-    this.status,
-  });
-
-  final bool canPunchIn;
-  final bool canPunchOut;
-  final String? checkIn;
-  final String? checkOut;
-  final String? workingHoursFormatted;
-  final String? status;
-}
 
 class AttendanceProvider extends ChangeNotifier {
   AttendanceProvider(this._service);
@@ -30,30 +11,6 @@ class AttendanceProvider extends ChangeNotifier {
   AppState<Map<String, dynamic>> todayState = const AppState();
   AppState<List<Map<String, dynamic>>> historyState = const AppState();
   AppState<Map<String, dynamic>> adminAttendanceState = const AppState();
-
-  AttendanceModelData? get todayAttendance {
-    final data = todayState.data;
-    if (data == null) return null;
-    final att = data['attendance'] is Map ? data['attendance'] : data;
-
-    final canIn = att['canPunchIn'] == true;
-    final canOut = att['canPunchOut'] == true;
-    final checkIn = att['checkIn']?.toString();
-    final checkOut = att['checkOut']?.toString();
-    final mins = att['workingMinutes'] is int ? att['workingMinutes'] as int : 0;
-    final hours = math.max(0, mins ~/ 60);
-    final remMins = math.max(0, mins % 60);
-    final formattedHours = mins > 0 ? '${hours}h ${remMins}m' : null;
-
-    return AttendanceModelData(
-      canPunchIn: canIn,
-      canPunchOut: canOut,
-      checkIn: checkIn,
-      checkOut: checkOut,
-      workingHoursFormatted: formattedHours,
-      status: att['status']?.toString(),
-    );
-  }
 
   bool get punchedIn {
     final att = todayState.data?['attendance'] ?? todayState.data;
@@ -70,8 +27,6 @@ class AttendanceProvider extends ChangeNotifier {
     final checkOut = att['checkOut'] ?? att['punchOutTime'];
     return checkIn != null && checkOut != null && checkOut != '--';
   }
-
-  Future<void> loadTodayAttendance() => loadToday();
 
   Future<void> loadToday() async {
     todayState = const AppState(status: LoadStatus.loading);
@@ -90,6 +45,8 @@ class AttendanceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+
+  
   Future<void> loadHistory({int? month, int? year, String? status}) async {
     historyState = const AppState(status: LoadStatus.loading);
     notifyListeners();
@@ -106,7 +63,7 @@ class AttendanceProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
-
+  
   Future<Map<String, dynamic>> submitPunchIn(String selfiePath, {double? latitude, double? longitude}) async {
     try {
       final result = await _service.punchIn(selfiePath, latitude: latitude, longitude: longitude);
@@ -126,7 +83,6 @@ class AttendanceProvider extends ChangeNotifier {
       rethrow;
     }
   }
-
   // Admin Attendance Management
   Future<void> loadAdminAttendance({
     String? date,
@@ -151,7 +107,7 @@ class AttendanceProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
-
+  
   Future<void> adminCorrectAttendance(
     int id, {
     required String status,
@@ -169,4 +125,13 @@ class AttendanceProvider extends ChangeNotifier {
       remarks: remarks,
     );
   }
+}
+
+async {
+  awit _service.adminUpdateAttendances(
+    int id,
+    status: status,
+    changeReason: ChangeReason,
+    punchINTime:punchInTime,
+  )
 }

@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
     let dir = 'uploads/profile';
     if (file.fieldname.includes('selfie') || file.fieldname === 'selfie') {
       dir = 'uploads/attendance';
-    } else if (file.fieldname.includes('bill')) {
+    } else if (file.fieldname.includes('bill') || file.fieldname.includes('expense') || file.fieldname.includes('reimbursement') || file.fieldname.includes('attachment') || file.fieldname.includes('file')) {
       dir = 'uploads/expenses';
     } else if (file.fieldname.includes('document')) {
       dir = 'uploads/documents';

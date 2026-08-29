@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/session/app_session.dart';
+import '../providers/auth_provider.dart';
 import '../../dashboard/screens/admin_home_shell.dart';
+import '../../dashboard/screens/employee_shell.dart';
 import 'employee_selector_screen.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
@@ -99,9 +102,9 @@ class RoleSelectionScreen extends StatelessWidget {
               // 2. EMPLOYEE CARD
               _RoleCard(
                 title: 'EMPLOYEE MODE',
-                subtitle: 'Selfie attendance, profile, leave requests, trips & expenses',
+                subtitle: 'Select employee profile, mark selfie attendance & manage leaves',
                 icon: Icons.person_rounded,
-                color: const Color(0xFF059669),
+                color: const Color(0xFF00BFA5),
                 onTap: () async {
                   await AppSession.instance.setRole('EMPLOYEE');
                   if (!context.mounted) return;

@@ -6,6 +6,7 @@ import '../../auth/screens/employee_selector_screen.dart';
 import '../../auth/screens/role_selection_screen.dart';
 import '../../documents/screens/documents_screen.dart';
 import '../../expenses/screens/expenses_screen.dart';
+import '../../expenses/screens/request_reimbursement_screen.dart';
 import '../../holidays/screens/holidays_screen.dart';
 import '../../leave/screens/leave_screen.dart';
 import '../../notes/screens/notes_screen.dart';
@@ -49,7 +50,7 @@ class MoreScreen extends StatelessWidget {
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TripsScreen()));
               }),
               _buildTile(context, 'Expense Reimbursement', Icons.receipt_long_outlined, const Color(0xFF0891B2), () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ExpensesScreen()));
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RequestReimbursementScreen()));
               }),
               const SizedBox(height: 16),
               _buildSectionHeader('Organization & Benefits'),

@@ -19,6 +19,7 @@ import referralRoutes from './routes/referralRoutes.js';
 import salaryRoutes from './routes/salaryRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
+import reimbursementRoutes from './routes/reimbursementRoutes.js';
 import companyRoutes from './routes/companyRoutes.js';
 import branchRoutes from './routes/branchRoutes.js';
 import departmentRoutes from './routes/departmentRoutes.js';
@@ -49,6 +50,7 @@ app.use('/api/leaves', leaveRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use('/api/reimbursements', reimbursementRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/holidays', holidayRoutes);
 app.use('/api/documents', documentRoutes);
@@ -57,6 +59,7 @@ app.use('/api/salary', salaryRoutes);
 app.use('/api/payslips', salaryRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/reports', reportRoutes);
+
 
 app.use(notFound);
 app.use(errorHandler);

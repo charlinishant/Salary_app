@@ -7,6 +7,7 @@ import '../features/company/screens/company_profile_screen.dart';
 import '../features/departments/screens/department_list_screen.dart';
 import '../features/documents/screens/documents_screen.dart';
 import '../features/expenses/screens/expenses_screen.dart';
+import '../features/expenses/screens/request_reimbursement_screen.dart';
 import '../features/holidays/screens/holidays_screen.dart';
 import '../features/leave/screens/admin_leave_requests_screen.dart';
 import '../features/leave/screens/leave_holidays_tab_screen.dart';
@@ -38,6 +39,7 @@ class AppRoutes {
   static const leaveHolidays = '/leave-holidays';
   static const trips = '/trips';
   static const expenses = '/expenses';
+  static const reimbursements = '/reimbursements';
   static const notes = '/notes';
   static const holidays = '/holidays';
   static const documents = '/documents';
@@ -70,6 +72,7 @@ class AppRoutes {
     leaveHolidays: (_) => const LeaveHolidaysTabScreen(),
     trips: (_) => const TripsScreen(),
     expenses: (_) => const ExpensesScreen(),
+    reimbursements: (_) => const RequestReimbursementScreen(),
     notes: (_) => const NotesScreen(),
     holidays: (_) => const HolidaysScreen(),
     documents: (_) => const DocumentsScreen(),

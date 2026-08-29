@@ -64,19 +64,39 @@ class _LeaveScreenState extends State<LeaveScreen> with SingleTickerProviderStat
           ? responses[2]['data']
           : (responses[2] is List ? responses[2] : []);
 
+      final availableTypes = types.isNotEmpty
+          ? types
+          : [
+              {'id': 1, 'name': 'Casual Leave (CL)', 'code': 'CL'},
+              {'id': 2, 'name': 'Sick Leave (SL)', 'code': 'SL'},
+              {'id': 3, 'name': 'Paid Leave (PL)', 'code': 'PL'},
+              {'id': 4, 'name': 'Unpaid Leave (LWP)', 'code': 'LWP'},
+            ];
+
       if (mounted) {
         setState(() {
-          _leaveTypes = types;
+          _leaveTypes = availableTypes;
           _leaveBalances = balances;
           _myRequests = requests;
-          if (types.isNotEmpty && _selectedLeaveTypeId == null) {
-            _selectedLeaveTypeId = types[0]['id'];
+          if (availableTypes.isNotEmpty && _selectedLeaveTypeId == null) {
+            _selectedLeaveTypeId = availableTypes[0]['id'];
           }
           _isLoading = false;
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _leaveTypes = [
+            {'id': 1, 'name': 'Casual Leave (CL)', 'code': 'CL'},
+            {'id': 2, 'name': 'Sick Leave (SL)', 'code': 'SL'},
+            {'id': 3, 'name': 'Paid Leave (PL)', 'code': 'PL'},
+            {'id': 4, 'name': 'Unpaid Leave (LWP)', 'code': 'LWP'},
+          ];
+          _selectedLeaveTypeId = 1;
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -109,6 +129,8 @@ class _LeaveScreenState extends State<LeaveScreen> with SingleTickerProviderStat
 
       await apiClient.post('/leaves', data: {
         'leaveTypeId': _selectedLeaveTypeId,
+        'fromDate': DateFormat('yyyy-MM-dd').format(_fromDate),
+        'toDate': DateFormat('yyyy-MM-dd').format(_toDate),
         'startDate': DateFormat('yyyy-MM-dd').format(_fromDate),
         'endDate': DateFormat('yyyy-MM-dd').format(_toDate),
         'numberOfDays': days > 0 ? days : 1,

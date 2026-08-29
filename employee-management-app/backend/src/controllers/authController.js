@@ -15,8 +15,8 @@ export const authController = {
     res.json({ success: true, ...data });
   }),
   me: asyncHandler(async (req, res) => {
-    const data = await authService.me(req.user.id);
-    res.json({ success: true, data });
+    const emp = await authService.me(req.user.id);
+    res.json({ success: true, data: emp, employee: emp });
   }),
   logout: (_req, res) => res.json({ success: true }),
 };

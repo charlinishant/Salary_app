@@ -7,6 +7,7 @@ import 'core/config/app_config.dart';
 import 'core/network/api_client.dart';
 import 'core/session/app_session.dart';
 import 'core/storage/secure_storage.dart';
+import 'core/services/alarm_sound_service.dart';
 import 'features/announcements/providers/announcement_provider.dart';
 import 'features/announcements/services/announcement_service.dart';
 import 'features/attendance/providers/attendance_provider.dart';
@@ -92,7 +93,12 @@ void main() async {
       child: const EmployeeManagementApp(),
     ),
   );
+
+  // Start background periodic alarm monitor
+  AlarmSoundService.instance.startAlarmMonitor(appNavigatorKey);
 }
+
+final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
 class EmployeeManagementApp extends StatelessWidget {
   const EmployeeManagementApp({super.key});
@@ -100,6 +106,7 @@ class EmployeeManagementApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: appNavigatorKey,
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
