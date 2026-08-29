@@ -6,7 +6,8 @@ class BranchService {
 
   BranchService(this._apiClient);
 
-  Future<List<BranchModel>> fetchBranches({String? search, String? status}) async {
+  Future<List<BranchModel>> fetchBranches(
+      {String? search, String? status}) async {
     final data = await _apiClient.get(
       '/api/branches',
       query: {
@@ -20,13 +21,17 @@ class BranchService {
 
   Future<BranchModel> createBranch(Map<String, dynamic> data) async {
     final res = await _apiClient.post('/api/branches', data: data);
-    final json = res is Map<String, dynamic> && res.containsKey('data') ? res['data'] : res;
+    final json = res is Map<String, dynamic> && res.containsKey('data')
+        ? res['data']
+        : res;
     return BranchModel.fromJson(json);
   }
 
   Future<BranchModel> updateBranch(int id, Map<String, dynamic> data) async {
     final res = await _apiClient.put('/api/branches/$id', data: data);
-    final json = res is Map<String, dynamic> && res.containsKey('data') ? res['data'] : res;
+    final json = res is Map<String, dynamic> && res.containsKey('data')
+        ? res['data']
+        : res;
     return BranchModel.fromJson(json);
   }
 

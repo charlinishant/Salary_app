@@ -32,41 +32,50 @@ class AttendanceProvider extends ChangeNotifier {
     todayState = const AppState(status: LoadStatus.loading);
     notifyListeners();
     if (AppConfig.demoMode) {
-      todayState = AppState(status: LoadStatus.success, data: DemoData.attendanceToday);
+      todayState =
+          AppState(status: LoadStatus.success, data: DemoData.attendanceToday);
       notifyListeners();
       return;
     }
     try {
       final res = await _service.today();
-      todayState = AppState(status: res == null ? LoadStatus.empty : LoadStatus.success, data: res);
+      todayState = AppState(
+          status: res == null ? LoadStatus.empty : LoadStatus.success,
+          data: res);
     } catch (error) {
-      todayState = AppState(status: LoadStatus.error, message: error.toString());
+      todayState =
+          AppState(status: LoadStatus.error, message: error.toString());
     }
     notifyListeners();
   }
 
-
-  
   Future<void> loadHistory({int? month, int? year, String? status}) async {
     historyState = const AppState(status: LoadStatus.loading);
     notifyListeners();
     if (AppConfig.demoMode) {
-      historyState = AppState(status: LoadStatus.success, data: DemoData.attendanceHistory);
+      historyState = AppState(
+          status: LoadStatus.success, data: DemoData.attendanceHistory);
       notifyListeners();
       return;
     }
     try {
-      final rows = await _service.history(month: month, year: year, status: status);
-      historyState = AppState(status: rows.isEmpty ? LoadStatus.empty : LoadStatus.success, data: rows);
+      final rows =
+          await _service.history(month: month, year: year, status: status);
+      historyState = AppState(
+          status: rows.isEmpty ? LoadStatus.empty : LoadStatus.success,
+          data: rows);
     } catch (error) {
-      historyState = AppState(status: LoadStatus.error, message: error.toString());
+      historyState =
+          AppState(status: LoadStatus.error, message: error.toString());
     }
     notifyListeners();
   }
-  
-  Future<Map<String, dynamic>> submitPunchIn(String selfiePath, {double? latitude, double? longitude}) async {
+
+  Future<Map<String, dynamic>> submitPunchIn(String selfiePath,
+      {double? latitude, double? longitude}) async {
     try {
-      final result = await _service.punchIn(selfiePath, latitude: latitude, longitude: longitude);
+      final result = await _service.punchIn(selfiePath,
+          latitude: latitude, longitude: longitude);
       await loadToday();
       return result;
     } catch (error) {
@@ -74,15 +83,18 @@ class AttendanceProvider extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> submitPunchOut(String selfiePath, {double? latitude, double? longitude}) async {
+  Future<Map<String, dynamic>> submitPunchOut(String selfiePath,
+      {double? latitude, double? longitude}) async {
     try {
-      final result = await _service.punchOut(selfiePath, latitude: latitude, longitude: longitude);
+      final result = await _service.punchOut(selfiePath,
+          latitude: latitude, longitude: longitude);
       await loadToday();
       return result;
     } catch (error) {
       rethrow;
     }
   }
+
   // Admin Attendance Management
   Future<void> loadAdminAttendance({
     String? date,
@@ -103,11 +115,12 @@ class AttendanceProvider extends ChangeNotifier {
       );
       adminAttendanceState = AppState(status: LoadStatus.success, data: res);
     } catch (error) {
-      adminAttendanceState = AppState(status: LoadStatus.error, message: error.toString());
+      adminAttendanceState =
+          AppState(status: LoadStatus.error, message: error.toString());
     }
     notifyListeners();
   }
-  
+
   Future<void> adminCorrectAttendance(
     int id, {
     required String status,
@@ -125,13 +138,4 @@ class AttendanceProvider extends ChangeNotifier {
       remarks: remarks,
     );
   }
-}
-
-async {
-  awit _service.adminUpdateAttendances(
-    int id,
-    status: status,
-    changeReason: ChangeReason,
-    punchINTime:punchInTime,
-  )
 }
